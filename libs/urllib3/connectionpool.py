@@ -1019,18 +1019,25 @@ class HTTPSConnectionPool(HTTPConnectionPool):
             _proxy_headers,
             **conn_kw,
         )
-
+    
+        # Dynamically resolve the CA certificate file
+        self.ca_certs = ca_certs or os.getenv("REQUESTS_CA_BUNDLE")
+        if not self.ca_certs:
+            log.warning("No CA certificate file specified or found in REQUESTS_CA_BUNDLE.")
+    
         self.key_file = key_file
         self.cert_file = cert_file
         self.cert_reqs = cert_reqs
         self.key_password = key_password
-        self.ca_certs = ca_certs
         self.ca_cert_dir = ca_cert_dir
         self.ssl_version = ssl_version
         self.ssl_minimum_version = ssl_minimum_version
         self.ssl_maximum_version = ssl_maximum_version
         self.assert_hostname = assert_hostname
         self.assert_fingerprint = assert_fingerprint
+    
+        # Log for debugging
+        log.debug(f"Using CA certificate file: {self.ca_certs}")
 
     def _prepare_proxy(self, conn: HTTPSConnection) -> None:  # type: ignore[override]
         """Establishes a tunnel connection through HTTP CONNECT."""
